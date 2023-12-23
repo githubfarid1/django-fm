@@ -5,5 +5,8 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include("filemanager.urls"))
+    path("", include("authentication.urls")), # Auth routes - login / register
+    path("", include("home.urls")),
+
+    path('fm/', include("filemanager.urls"))
 ]

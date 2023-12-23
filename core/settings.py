@@ -1,7 +1,7 @@
 from pathlib import Path
 import environ
 import os
-
+from datetime import timedelta
 env = environ.Env(
     DEBUG=(bool, False)
 )
@@ -23,6 +23,7 @@ SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
+TITLE = env("TITLE")
 ALLOWED_HOSTS = []
 
 
@@ -35,25 +36,31 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'filemanager.apps.FilemanagerConfig'
+    'filemanager.apps.FilemanagerConfig',
+    'home'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_auto_logout.middleware.auto_logout', # auto logout
+
 ]
 
 ROOT_URLCONF = 'core.urls'
+LOGIN_REDIRECT_URL = "home"  # Route defined in home/urls.py
+LOGOUT_REDIRECT_URL = "home"  # Route defined in home/urls.py
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(CORE_DIR, "templates")],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,6 +68,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'context_processors.cfg_assets_root',
+                'django_auto_logout.context_processors.auto_logout_client', # auto logout
             ],
         },
     },
@@ -116,7 +125,22 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(CORE_DIR, 'static'),
+)
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTO_LOGOUT = {
+    'IDLE_TIME': timedelta(minutes=10),
+    # 'SESSION_TIME': timedelta(minutes=60),
+    'MESSAGE': 'The session has expired. Please login again to continue.',
+    'REDIRECT_TO_LOGIN_IMMEDIATELY': True,
+}
+# Assets Management
+ASSETS_ROOT = os.getenv('ASSETS_ROOT', '/static/assets') 
+FM_LOCATION = env("FM_LOCATION")

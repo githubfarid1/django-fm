@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'filemanager.apps.FilemanagerConfig',
     'home',
     'crispy_forms',
+    'widget_tweaks',
+
 ]
 
 MIDDLEWARE = [

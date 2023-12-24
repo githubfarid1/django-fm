@@ -7,13 +7,15 @@ from datetime import date, datetime
 import mimetypes
 from os.path import exists
 import json
-from .forms import DepartmentForm, AddFolderForm, RenameFileForm
+from .forms import AddFolderForm, RenameFileForm
 
 def index(request):
     return HttpResponse("tess")
 
 def build_breadcrumbs(url):
-    folderlist = str(url).split(os.path.sep )
+    folderlist = []
+    if url != '':
+        folderlist = str(url).split(os.path.sep )
     result = []
     for idx, folder in enumerate(folderlist):
         tmpl = []
@@ -24,6 +26,7 @@ def build_breadcrumbs(url):
             'link': os.path.sep.join(tmpl),
         }
         result.append(mdict)
+    result.insert(0, {"label":'Root', 'link':'~'})
     result[-1]['link'] = ''
     return result
 
@@ -43,7 +46,7 @@ def show_folder(request):
         # 'depname':dep.name,
         'username': username,
         # 'depslug': slug,
-        # 'breadcrumbs': build_breadcrumbs(folder),
+        'breadcrumbs': build_breadcrumbs(folder),
         'folder': folder,
         'satkername': 'PJPA',
         'depurl': 'fm_pjpa_department',
@@ -61,16 +64,12 @@ def show_folder(request):
 def folder_list(request):
     if not request.user.is_authenticated:
         return redirect('login')
-    slug = request.GET.get("slug")
-    year = request.GET.get("year")
     username = request.GET.get("username")
     folder = request.GET.get("folder")
     
     folderlist = str(folder).split("/")
     folderlist.pop(0)
-    # path = os.path.join(settings.FM_LOCATION, __package__.split('.')[1], slug, year, folder)
     path = os.path.join(settings.FM_LOCATION, username, folder)
-    print(path)
     contents =os.listdir(path)
     data = []
     for file in contents:
@@ -178,12 +177,10 @@ def get_fileinfo(filepath):
 def remove_file(request):
     if request.method == "POST":
         filename = request.POST.get('filename')
-        slug = request.POST.get("slug")
-        year = str(request.POST.get("year"))
         folder = request.POST.get("folder")
         type = request.POST.get("type")
 
-        path = os.path.join(settings.FM_LOCATION, __package__.split('.')[1], slug, year, folder, filename)
+        path = os.path.join(settings.FM_LOCATION, request.user.username, folder, filename)
         if exists(path):
             if type=='file':
                 os.remove(path)
@@ -202,15 +199,11 @@ def remove_file(request):
                 })
             })
     else:
-        slug = request.GET.get("slug")
-        year = str(request.GET.get("year"))
         folder = request.GET.get("folder")
         filename = request.GET.get("filename")
         type = request.GET.get("type")
         
-    return render(request, 'file_manager/remove_file.html', {
-        'slug': slug,
-        'year': year,
+    return render(request, 'filemanager/remove_file.html', {
         'folder': folder,
         'filename': filename,
         'type': type
@@ -255,12 +248,10 @@ def download_folder(request):
 def rename_file(request):
     if request.method == "POST":
         newname = request.POST.get('newname')
-        slug = request.POST.get("slug")
-        year = str(request.POST.get("year"))
         folder = request.POST.get("folder")
         filename = request.POST.get("filename")
-        existingfile = os.path.join(settings.FM_LOCATION, __package__.split('.')[1], slug, year, folder, filename)
-        newfile = os.path.join(settings.FM_LOCATION, __package__.split('.')[1], slug, year, folder, newname)
+        existingfile = os.path.join(settings.FM_LOCATION, request.user.username, folder, filename)
+        newfile = os.path.join(settings.FM_LOCATION, request.user.username, folder, newname)
         if exists(existingfile):
             os.rename(existingfile, newfile)
             message = f"perubahan nama {filename} Sukses."
@@ -276,11 +267,55 @@ def rename_file(request):
                 })
             })
     else:
+        folder = request.GET.get("folder")
+        filename = request.GET.get("filename")
+        form = RenameFileForm(initial={'newname':filename, 'folder': folder, 'filename': filename})
+    return render(request, 'filemanager/rename_file.html', {
+        'form': form,
+    })
+
+@csrf_exempt
+def add_folder(request):
+    if request.method == "POST":
+        foldername = request.POST.get('foldername')
+        slug = request.POST.get("slug")
+        year = str(request.POST.get("year"))
+        folder = request.POST.get("folder")
+        newfolder = os.path.join(settings.FM_LOCATION, __package__.split('.')[1], slug, year, folder, foldername)
+        if not exists(newfolder):
+            os.mkdir(newfolder)
+            message = f"penambahan folder {foldername} Sukses."
+        else:
+            message = f"penambahan folder {foldername} Gagal."
+                    
+        return HttpResponse(
+            status=204,
+            headers={
+                'HX-Trigger': json.dumps({
+                    "movieListChanged": None,
+                    "showMessage": message
+                })
+            })
+    else:
         slug = request.GET.get("slug")
         year = str(request.GET.get("year"))
         folder = request.GET.get("folder")
-        filename = request.GET.get("filename")
-        form = RenameFileForm(initial={'newname':filename, 'year': year, 'slug': slug, 'folder': folder, 'filename': filename})
-    return render(request, 'file_manager/rename_file.html', {
+        form = AddFolderForm(initial={'year': year, 'slug': slug, 'folder': folder})
+    return render(request, 'file_manager/add_folder.html', {
         'form': form,
     })
+
+@csrf_exempt
+def download(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+    folder = request.GET.get("folder")
+    filename = request.GET.get("filename")
+    path = os.path.join(settings.FM_LOCATION, request.user.username, folder, filename)
+    if exists(path):
+        mime_type, encoding = mimetypes.guess_type(path)
+        with open(path, 'rb') as pdf:
+            response = HttpResponse(pdf.read(), content_type=f'{mime_type}')
+            response['Content-Disposition'] = f'inline;filename={filename}'
+            return response
+    raise Http404

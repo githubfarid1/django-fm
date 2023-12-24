@@ -18,7 +18,7 @@
 
 {% block content %}
 <div class="container-fluid">
-    <p class="text-left text-primary"><a class="btn btn-warning mb-2" href="{% url deplisturl %}">SATKER {{ satkername }}</a> &#62;&#62; <a class="btn btn-warning mb-2" href={% url depurl depslug %}> {{ depname }}</a> &#62;&#62;
+    {% comment %} <p class="text-left text-primary"><a class="btn btn-warning mb-2" href="{% url deplisturl %}">SATKER {{ satkername }}</a> &#62;&#62; <a class="btn btn-warning mb-2" href={% url depurl depslug %}> {{ depname }}</a> &#62;&#62;
     {% if breadcrumbs.0.label == '' %}
     {{ year }}    
     {% else %}
@@ -44,9 +44,10 @@
             </button>
         </div>
     
-    </div>
+    </div> {% endcomment %}
     
-    <div class="row" hx-trigger="load, movieListChanged from:body" hx-get="{% url folderlisturl %}?slug={{ slug }}&year={{ year }}&folder={{ folder }}" hx-target="this">
+    {% comment %} <div class="row" hx-trigger="load, movieListChanged from:body" hx-get="{% url folderlisturl %}?username={{ username }}&slug={{ slug }}&year={{ year }}&folder={{ folder }}" hx-target="this"> {% endcomment %}
+    <div class="row" hx-trigger="load, movieListChanged from:body" hx-get="{% url 'folder_list' %}?username={{ username }}&folder={{ folder }}" hx-target="this">
         <span class="visually-hidden">Loading...</span>
     </div>
     <!-- Placeholder for the modal -->

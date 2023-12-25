@@ -8,6 +8,9 @@ import mimetypes
 from os.path import exists
 import json
 from .forms import AddFolderForm, RenameFileForm
+from django.core.files.storage import FileSystemStorage
+from django.urls import reverse
+from urllib.parse import urlencode
 
 def index(request):
     return HttpResponse("tess")
@@ -31,42 +34,34 @@ def build_breadcrumbs(url):
     return result
 
 @csrf_exempt
-# def show_folder(request, slug, year):
 def show_folder(request):
-
     if not request.user.is_authenticated:
         return redirect('login')
     
     username = request.user.username
     folder = request.GET.get("folder")
-    # dep = Department.objects.get(slug=slug)
+    if folder == None:
+        base_url = reverse('show_folder')
+        query_string =  urlencode({'folder': ''})
+        url = '{}?{}'.format(base_url, query_string)
+        return redirect(url)
     context = {
-        # 'slug': slug,
-        # 'year': year,
-        # 'depname':dep.name,
         'username': username,
-        # 'depslug': slug,
         'breadcrumbs': build_breadcrumbs(folder),
         'folder': folder,
-        'satkername': 'PJPA',
-        'depurl': 'fm_pjpa_department',
-        'deplisturl': 'fm_pjpa_department_list',
-        'folderlisturl': 'fm_pjpa_folder_list',
-        'downloadurl': 'fm_pjpa_download',
-        'depyearurl': 'fm_pjpa_department_year',
-        'showfolderurl': 'fm_pjpa_show_folder',
-        'addfolderurl': 'fm_pjpa_add_folder',
-        'uploadfileurl': 'fm_pjpa_upload_file'
     }
     return render(request=request, template_name='filemanager/show_folder.html', context=context)
+
 
 @csrf_exempt
 def folder_list(request):
     if not request.user.is_authenticated:
         return redirect('login')
-    username = request.GET.get("username")
     folder = request.GET.get("folder")
+    # if folder == 'None':
+    #     folder = ""
     
+    username = request.user.username
     folderlist = str(folder).split("/")
     folderlist.pop(0)
     path = os.path.join(settings.FM_LOCATION, username, folder)
@@ -216,11 +211,9 @@ def zipfolder(path):
 def download_folder(request):
     if request.method == "POST":
         filename = request.POST.get('filename')
-        slug = request.POST.get("slug")
-        year = str(request.POST.get("year"))
         folder = request.POST.get("folder")
 
-        path = os.path.join(settings.FM_LOCATION, __package__.split('.')[1], slug, year, folder, filename)
+        path = os.path.join(settings.FM_LOCATION, request.user.username, folder, filename)
         # await sync_to_async(zipfolder, thread_sensitive=True)
         shutil.make_archive(path, "zip", path)    
         return HttpResponse(
@@ -232,14 +225,10 @@ def download_folder(request):
                 })
             })
     else:
-        slug = request.GET.get("slug")
-        year = str(request.GET.get("year"))
         folder = request.GET.get("folder")
         filename = request.GET.get("filename")
         
-    return render(request, 'file_manager/download_folder.html', {
-        'slug': slug,
-        'year': year,
+    return render(request, 'filemanager/download_folder.html', {
         'folder': folder,
         'filename': filename,
     })
@@ -278,10 +267,8 @@ def rename_file(request):
 def add_folder(request):
     if request.method == "POST":
         foldername = request.POST.get('foldername')
-        slug = request.POST.get("slug")
-        year = str(request.POST.get("year"))
         folder = request.POST.get("folder")
-        newfolder = os.path.join(settings.FM_LOCATION, __package__.split('.')[1], slug, year, folder, foldername)
+        newfolder = os.path.join(settings.FM_LOCATION, request.user.username, folder, foldername)
         if not exists(newfolder):
             os.mkdir(newfolder)
             message = f"penambahan folder {foldername} Sukses."
@@ -300,8 +287,8 @@ def add_folder(request):
         slug = request.GET.get("slug")
         year = str(request.GET.get("year"))
         folder = request.GET.get("folder")
-        form = AddFolderForm(initial={'year': year, 'slug': slug, 'folder': folder})
-    return render(request, 'file_manager/add_folder.html', {
+        form = AddFolderForm(initial={'folder': folder})
+    return render(request, 'filemanager/add_folder.html', {
         'form': form,
     })
 
@@ -319,3 +306,32 @@ def download(request):
             response['Content-Disposition'] = f'inline;filename={filename}'
             return response
     raise Http404
+
+@csrf_exempt
+def upload_file(request):
+    if request.method == "POST":
+        if request.FILES:
+            folder = request.POST.get("folder")
+            uploads = request.FILES.getlist('uploadfiles')
+            for upload in uploads:
+                # pathlist = [__package__.split('.')[1], slug, year, str(folder).replace(os.path.sep, '$$'), str(upload)]
+                # filetmpname = "$$".join(pathlist)
+                # filetmppath = os.path.join(settings.MEDIA_ROOT, "tmpfiles", filetmpname)
+                # fss = FileSystemStorage()
+                # fss.save(filetmppath, upload)
+                path = os.path.join(settings.FM_LOCATION, request.user.username, folder, str(upload))
+                fss = FileSystemStorage()
+                fss.save(path, upload)
+            return HttpResponse(
+                status=204,
+                headers={
+                    'HX-Trigger': json.dumps({
+                        "movieListChanged": None,
+                        "showMessage": 'Upload File Sukses, tunggu beberapa saat kemudian refresh halaman'
+                    })
+                })
+    else:
+        folder = request.GET.get("folder")
+    return render(request, 'filemanager/upload_file.html', {
+        'folder': folder
+    })

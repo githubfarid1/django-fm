@@ -36,22 +36,20 @@
     {% endif %}
    {% endfor %}
     </p>
-    {% comment %} <div class="d-flex flex-row-reverse bd-highlight">
+    <div class="d-flex flex-row-reverse bd-highlight">
         <div class="p-2 bd-highlight">
-            <button hx-get="{% url addfolderurl %}?slug={{ slug }}&year={{ year }}&folder={{ folder }}" hx-target="#dialog" class="btn btn-sm btn-primary">
+            <button hx-get="{% url 'add_folder' %}?folder={{ folder }}" hx-target="#dialog" class="btn btn-sm btn-primary">
                 Folder Baru
             </button>
         </div>
         <div class="p-2 bd-highlight">
-            <button hx-get="{% url uploadfileurl %}?slug={{ slug }}&year={{ year }}&folder={{ folder }}" hx-target="#dialog" class="btn btn-sm btn-primary">
+            <button hx-get="{% url 'upload_file' %}?folder={{ folder }}" hx-target="#dialog" class="btn btn-sm btn-primary">
                 Upload File
             </button>
         </div>
+    </div>
     
-    </div> {% endcomment %}
-    
-    {% comment %} <div class="row" hx-trigger="load, movieListChanged from:body" hx-get="{% url folderlisturl %}?username={{ username }}&slug={{ slug }}&year={{ year }}&folder={{ folder }}" hx-target="this"> {% endcomment %}
-    <div class="row" hx-trigger="load, movieListChanged from:body" hx-get="{% url 'folder_list' %}?username={{ username }}&folder={{ folder }}" hx-target="this">
+    <div class="row" hx-trigger="load, movieListChanged from:body" hx-get="{% url 'folder_list' %}?folder={{ folder }}" hx-target="this">
         <span class="visually-hidden">Loading...</span>
     </div>
     <!-- Placeholder for the modal -->

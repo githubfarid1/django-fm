@@ -5,27 +5,25 @@
         <div class="col-lg-3 mt-3">
             <div class="card border-primary mb-3">
                 <div class="row no-gutters px-3 py-2">
-                    {% comment %} <div class="col-lg-12">
+                    <div class="col-lg-12">
                         <div class="row">
                             <div class="col-lg-2">   
-                                <button hx-get="{% url zipfolderurl %}?slug={{ slug }}&year={{ year }}&folder={{ folder }}&filename={{ d.name }}" hx-target="#dialog" class="btn btn-warning">
+                                <button hx-get="{% url 'download_folder' %}?folder={{ folder }}&filename={{ d.name }}" hx-target="#dialog" class="btn btn-warning">
                                     <i class="bi bi-file-earmark-zip"></i>
                                 </button>
                             </div>
                             <div class="col-lg-2">   
-                                <button hx-get="{% url renameurl %}?slug={{ slug }}&year={{ year }}&folder={{ folder }}&filename={{ d.name }}" hx-target="#dialog" class="btn btn-primary">
+                                <button hx-get="{% url 'rename_file' %}?folder={{ folder }}&filename={{ d.name }}" hx-target="#dialog" class="btn btn-primary">
                                     <i class="bi bi-bootstrap-reboot"></i>
                                 </button>
                             </div>
                             <div class="col-lg-2">   
-                                <button hx-get="{% url removeurl %}?type=folder&slug={{ slug }}&year={{ year }}&folder={{ folder }}&filename={{ d.name }}" hx-target="#dialog" class="btn btn-danger">
+                                <button hx-get="{% url 'remove_file' %}?folder={{ folder }}&filename={{ d.name }}" hx-target="#dialog" class="btn btn-danger">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
                         </div>
-                    </div> {% endcomment %}
-
-
+                    </div>
                     <div class="col-sm-6 mt-3 text-center">
                         <a href="{% url 'show_folder' %}?folder={{d.link}}"><img class="card-img border" src="{% static 'assets/filetypes/folder.png' %}" alt=""></a>
                     </div>

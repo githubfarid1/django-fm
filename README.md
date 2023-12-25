@@ -65,8 +65,9 @@ pip install -r requirements.txt
 ## How To Start
 
 1.  Run `python manage.py migrate`
-2.  Run `python manage.py runserver`
-3.  Open your browser using the url: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+2.  Run `python manage.py createsuperuser`
+3.  Run `python manage.py runserver`
+4.  Open your browser using the url: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ## TO DO's
 

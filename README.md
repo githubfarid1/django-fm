@@ -46,6 +46,16 @@ source django-fm-venv/bin/activate
 source django-fm-venv/Scripts/activate.ps1
 ```
 
+3. Create media folder
+(Linux - Ubuntu)
+```
+mkdir media
+```
+(Windows 10/11 with PowerShell)
+```
+mkdir media
+```
+
 4. Install modules by running 'requirements.txt'
 ```
 pip install -r requirements.txt

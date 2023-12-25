@@ -40,11 +40,20 @@ def show_folder(request):
     
     username = request.user.username
     folder = request.GET.get("folder")
+    
+    base_url = reverse('show_folder')
+    query_string =  urlencode({'folder': ''})
+    url = '{}?{}'.format(base_url, query_string)
+
     if folder == None:
-        base_url = reverse('show_folder')
-        query_string =  urlencode({'folder': ''})
-        url = '{}?{}'.format(base_url, query_string)
         return redirect(url)
+    
+    folderlist = str(folder).split("/")
+    folderlist.pop(0)
+    path = os.path.join(settings.FM_LOCATION, request.user.username, folder)
+    if not exists(path):
+        return redirect(url)
+
     context = {
         'username': username,
         'breadcrumbs': build_breadcrumbs(folder),
@@ -58,8 +67,6 @@ def folder_list(request):
     if not request.user.is_authenticated:
         return redirect('login')
     folder = request.GET.get("folder")
-    # if folder == 'None':
-    #     folder = ""
     
     username = request.user.username
     folderlist = str(folder).split("/")

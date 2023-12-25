@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 @login_required(login_url="/login/")
 def index(request):
     # return redirect("filemanager_index")
+    return redirect("show_folder")
     context = {'segment': 'index'}
     html_template = loader.get_template('home/index.html')
     return HttpResponse(html_template.render(context, request))

@@ -27,21 +27,22 @@ git clone https://github.com/githubfarid1/django-fm.git
 cd django-fm
 ```
 2. Create a virtual environment
-```
 (Linux - Ubuntu)
+```
 python3 -m venv django-fm-venv
-
+```
 (Windows 10/11 with PowerShell)
+```
 python -m venv django-fm-venv
-
 ```
 
 3. Activate virtual environment
-```
 (Linux - Ubuntu)
+```
 source django-fm-venv/bin/activate
-
+```
 (Windows 10/11 with PowerShell)
+```
 source django-fm-venv/Scripts/activate.ps1
 ```
 

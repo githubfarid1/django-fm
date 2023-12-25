@@ -43,7 +43,7 @@ source django-fm-venv/bin/activate
 ```
 (Windows 10/11 with PowerShell)
 ```
-source django-fm-venv/Scripts/activate.ps1
+django-fm-venv/Scripts/activate.ps1
 ```
 
 3. Create media folder

@@ -46,7 +46,7 @@ source django-fm-venv/bin/activate
 django-fm-venv/Scripts/activate.ps1
 ```
 
-3. Create media folder
+4. Create media folder
 (Linux - Ubuntu)
 ```
 mkdir media
@@ -55,8 +55,16 @@ mkdir media
 ```
 mkdir media
 ```
-
-4. Install modules by running 'requirements.txt'
+5. Copy .env.txt to .env
+(Linux - Ubuntu)
+```
+cp .env.txt .env
+```
+(Windows 10/11 with PowerShell)
+```
+cp .env.txt .env
+```
+6. Install modules by running 'requirements.txt'
 ```
 pip install -r requirements.txt
 ```
@@ -64,9 +72,18 @@ pip install -r requirements.txt
 
 ## How To Start
 
-1.  Run `python manage.py migrate`
-2.  Run `python manage.py createsuperuser`
-3.  Run `python manage.py runserver`
+1.  Migrate model to database
+```
+python manage.py migrate
+```
+2.  Create superuser
+```
+python manage.py createsuperuser
+```
+3.  Run Server
+```
+python manage.py runserver
+```
 4.  Open your browser using the url: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ## TO DO's
